@@ -1,6 +1,7 @@
 from starkware.cairo.common.registers import get_label_location
 from starkware.cairo.common.math_cmp import is_le
 
+#
 func get_table_encode{range_check_ptr}() -> (encoded_table : felt*):
     let (table_address) = get_label_location(TABLE_ENCODE)
 

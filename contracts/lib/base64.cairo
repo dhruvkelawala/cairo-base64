@@ -8,8 +8,7 @@ from starkware.cairo.common.memcpy import memcpy
 from contracts.lib.tables import get_table_encode, get_char_from_table
 from contracts.lib.binary import binary_encode, add_8bit_padding, binary_decode, remove_6bit_padding
 
-# data = ["A", "B", "C"]
-
+# Main base64 encoder function
 func base64_encode{range_check_ptr}(original_str_len : felt, original_str : felt*) -> (
         encoded_str_len : felt, encoded_str : felt*):
     alloc_locals
@@ -73,6 +72,9 @@ func base64_encode{range_check_ptr}(original_str_len : felt, original_str : felt
     return (overwritten_str_len, overwritten_str)
 end
 
+# Partial base64 function
+# From an inputed original string, takes a group of 3 char at a time and converts them to base64 recursively
+
 func _base64_encode_partial{range_check_ptr}(
         original_str_len : felt, original_str : felt*, encoded_str_len : felt, encoded_str : felt*,
         current_index : felt) -> ():
@@ -122,6 +124,7 @@ func _base64_encode_partial{range_check_ptr}(
         current_index=current_index + 3)
 end
 
+# Performs binary encoding recursively
 func _recursive_binary_encoding{range_check_ptr}(
         src_data_len : felt, src_data : felt*, dest_data : felt*, index : felt) -> ():
     alloc_locals
@@ -141,6 +144,8 @@ func _recursive_binary_encoding{range_check_ptr}(
     return _recursive_binary_encoding(
         src_data_len=src_data_len, src_data=src_data, dest_data=dest_data, index=index + 1)
 end
+
+# Concatenates 3 (8-bit) binary encoded chars into a 24-bit binary felt
 
 func concatenate_to_24_bits{range_check_ptr}(
         binary_encoded_str_len : felt, binary_encoded_str : felt*) -> (concatenated_felt : felt):
@@ -163,6 +168,9 @@ func concatenate_to_24_bits{range_check_ptr}(
 
     return (concatenated_felt=concatenated_felt)
 end
+
+# Slice a 24-bit binary felt into 4 groups
+# This makes each felt of the group 6-bits
 
 func slice_into_4_groups{range_check_ptr}(concatenated_felt : felt) -> (
         sliced_group_len : felt, sliced_group : felt*):
@@ -198,6 +206,11 @@ func _recursive_slice{range_check_ptr}(
     return _recursive_slice(
         sliced_group_len, sliced_group=sliced_group, src_felt=q, index=index + 1)
 end
+
+# This function recursively handles 3 functions
+# - Remove padding from a 6-bit felt
+# - Convert binary represented felt to a regular felt
+# - Get the character corresponding to the index represented by the felt
 
 func _recursive_binary_decoding{range_check_ptr}(
         src_data_len : felt, src_data : felt*, dest_data : felt*, index : felt) -> ():
