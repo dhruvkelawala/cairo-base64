@@ -1,12 +1,15 @@
 from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.uint256 import Uint256
-from starkware.cairo.common.pow import pow
 from starkware.cairo.common.math import unsigned_div_rem
 from starkware.cairo.common.math_cmp import is_le
 from starkware.cairo.common.memcpy import memcpy
 
-from contracts.lib.tables import get_table_encode, get_char_from_table
+from contracts.lib.tables import get_char_from_table
 from contracts.lib.binary import binary_encode, add_8bit_padding, binary_decode, remove_6bit_padding
+
+const pow_10_6 = 1000000
+const pow_10_8 = 100000000
+const pow_10_16 = 10000000000000000
 
 # Main base64 encoder function
 func base64_encode{range_check_ptr}(original_str_len : felt, original_str : felt*) -> (
@@ -154,10 +157,6 @@ func concatenate_to_24_bits{range_check_ptr}(
     # Make sure only 3 UTF-8 chars are passed
     assert binary_encoded_str_len = 3
 
-    let (pow_10_8) = pow(10, 8)  # 10^8
-
-    let (pow_10_16) = pow(10, 16)  # 10^16
-
     let least_significant_bits = binary_encoded_str[2]  # x * 10^0 = x
 
     let middle_significant_bits = pow_10_8 * binary_encoded_str[1]
@@ -194,8 +193,6 @@ func _recursive_slice{range_check_ptr}(
     if index == sliced_group_len:
         return ()
     end
-
-    let (pow_10_6) = pow(10, 6)
 
     let (q, r) = unsigned_div_rem(src_felt, pow_10_6)
 

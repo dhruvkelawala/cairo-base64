@@ -1,11 +1,14 @@
 from starkware.cairo.common.registers import get_label_location
 from starkware.cairo.common.math_cmp import is_le
 
-#
-func get_table_encode{range_check_ptr}() -> (encoded_table : felt*):
-    let (table_address) = get_label_location(TABLE_ENCODE)
+func get_char_from_table{range_check_ptr}(index : felt) -> (ascii_value : felt):
+    let (is_index_le_63) = is_le(index, 63)
 
-    return (encoded_table=cast(table_address, felt*))
+    assert is_index_le_63 = 1
+
+    let (table) = get_label_location(TABLE_ENCODE)
+
+    return ([table + index])
 
     TABLE_ENCODE:
     dw 'A'
@@ -72,17 +75,4 @@ func get_table_encode{range_check_ptr}() -> (encoded_table : felt*):
     dw '9'
     dw '+'
     dw '/'
-end
-
-func get_char_from_table{range_check_ptr}(index : felt) -> (ascii_value : felt):
-    alloc_locals
-    let (local encoded_table) = get_table_encode()
-
-    let (is_index_le_63) = is_le(index, 63)
-
-    assert is_index_le_63 = 1
-
-    let ascii_value = encoded_table[index]
-
-    return (ascii_value=ascii_value)
 end
