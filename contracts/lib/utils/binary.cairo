@@ -11,7 +11,7 @@ func binary_encode{range_check_ptr}(data : felt) -> (res : felt):
 
     let (q, r) = unsigned_div_rem(data, 2)
 
-    let (local bin : felt) = binary_encode(q)
+    let (bin : felt) = binary_encode(q)
 
     let res = r + 10 * bin
 
@@ -41,7 +41,7 @@ func binary_decode{range_check_ptr}(encoded_str : felt) -> (decimal_felt : felt)
 
     let (q, r) = unsigned_div_rem(encoded_str, 10)
 
-    let (local dec : felt) = binary_decode(q)
+    let (dec : felt) = binary_decode(q)
 
     let decimal_felt = r + 2 * dec
 

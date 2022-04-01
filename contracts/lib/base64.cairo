@@ -5,7 +5,7 @@ from starkware.cairo.common.math import unsigned_div_rem
 from starkware.cairo.common.math_cmp import is_le
 from starkware.cairo.common.memcpy import memcpy
 
-from contracts.lib.tables import get_table_encode, get_ascii_from_table
+from contracts.lib.tables import get_table_encode, get_char_from_table
 from contracts.lib.utils.binary import (
     binary_encode, add_8bit_padding, binary_decode, remove_6bit_padding)
 
@@ -18,7 +18,7 @@ func base64_encode{range_check_ptr}(original_str_len : felt, original_str : felt
     let (local encoded_str : felt*) = alloc()
     let (local encoded_str_len : felt*) = alloc()
 
-    let (local data_len : felt) = alloc()
+    let (local data_len : felt*) = alloc()
 
     let (q, r) = unsigned_div_rem(original_str_len, 3)
 
@@ -76,13 +76,11 @@ end
 
 func _base64_encode_partial{range_check_ptr}(
         original_str_len : felt, original_str : felt*, encoded_str_len : felt, encoded_str : felt*,
-        current_index : felt) -> (encoded_str_len : felt, encoded_str : felt*):
+        current_index : felt) -> ():
     alloc_locals
 
-    let (return_condition) = is_le(original_str_len, current_index)
-
-    if return_condition == 1:
-        return (encoded_str_len, encoded_str)
+    if original_str_len == current_index:
+        return ()
     end
 
     let (local str_to_encode : felt*) = alloc()
@@ -106,7 +104,7 @@ func _base64_encode_partial{range_check_ptr}(
 
     let (q, r) = unsigned_div_rem(current_index, 3)
 
-    let (local incrementer) = alloc()
+    let (local incrementer : felt*) = alloc()
 
     if r == 0:
         assert [incrementer] = q * 4
@@ -152,13 +150,11 @@ func concatenate_to_24_bits{range_check_ptr}(
     # Make sure only 3 UTF-8 chars are passed
     assert binary_encoded_str_len = 3
 
-    let (pow_10_0) = pow(10, 0)  # 10^0
-
     let (pow_10_8) = pow(10, 8)  # 10^8
 
     let (pow_10_16) = pow(10, 16)  # 10^16
 
-    let least_significant_bits = pow_10_0 * binary_encoded_str[2]
+    let least_significant_bits = binary_encoded_str[2]  # x * 10^0 = x
 
     let middle_significant_bits = pow_10_8 * binary_encoded_str[1]
 
@@ -204,23 +200,6 @@ func _recursive_slice{range_check_ptr}(
         sliced_group_len, sliced_group=sliced_group, src_felt=q, index=index + 1)
 end
 
-func _recursive_remove_padding{range_check_ptr}(
-        src_data_len : felt, src_data : felt*, dest_data : felt*, index : felt) -> (
-        decoded_str_len : felt, decoded_str : felt*):
-    alloc_locals
-
-    let (local binary_felt : felt) = remove_6bit_padding(src_data[index])
-
-    assert dest_data[index] = binary_felt
-
-    if index == src_data_len - 1:
-        return (decoded_str_len=src_data_len, decoded_str=dest_data)
-    end
-
-    return _recursive_remove_padding(
-        src_data_len=src_data_len, src_data=src_data, dest_data=dest_data, index=index + 1)
-end
-
 func _recursive_binary_decoding{range_check_ptr}(
         src_data_len : felt, src_data : felt*, dest_data : felt*, index : felt) -> ():
     alloc_locals
@@ -230,16 +209,33 @@ func _recursive_binary_decoding{range_check_ptr}(
     end
 
     # Remove Padding to get each binary character
-    let (local binary_felt : felt) = remove_6bit_padding(src_data[index])
+    let (binary_felt : felt) = remove_6bit_padding(src_data[index])
 
     # Convert All Chars of String to ASCII Binary representation
-    let (local res : felt) = binary_decode(binary_felt)
+    let (res : felt) = binary_decode(binary_felt)
 
     # Code them to Ascii Value
-    let (local ascii_value : felt) = get_ascii_from_table(res)
+    let (char_value : felt) = get_char_from_table(res)
 
-    assert dest_data[index] = ascii_value
+    assert dest_data[index] = char_value
 
     return _recursive_binary_decoding(
         src_data_len=src_data_len, src_data=src_data, dest_data=dest_data, index=index + 1)
 end
+
+# func _recursive_remove_padding{range_check_ptr}(
+#         src_data_len : felt, src_data : felt*, dest_data : felt*, index : felt) -> (
+#         decoded_str_len : felt, decoded_str : felt*):
+#     alloc_locals
+
+# let (local binary_felt : felt) = remove_6bit_padding(src_data[index])
+
+# assert dest_data[index] = binary_felt
+
+# if index == src_data_len - 1:
+#         return (decoded_str_len=src_data_len, decoded_str=dest_data)
+#     end
+
+# return _recursive_remove_padding(
+#         src_data_len=src_data_len, src_data=src_data, dest_data=dest_data, index=index + 1)
+# end

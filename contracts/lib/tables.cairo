@@ -73,7 +73,7 @@ func get_table_encode{range_check_ptr}() -> (encoded_table : felt*):
     dw '/'
 end
 
-func get_ascii_from_table{range_check_ptr}(index : felt) -> (ascii_value : felt):
+func get_char_from_table{range_check_ptr}(index : felt) -> (ascii_value : felt):
     alloc_locals
     let (local encoded_table) = get_table_encode()
 
