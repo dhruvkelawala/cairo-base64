@@ -17,9 +17,6 @@ def split(word):
 @pytest.mark.asyncio
 async def test_base64_encode(test_base64):
 
-    # input_string = str_to_felt('A')
-    # input_string2 = str_to_felt('B')
-    # input_string3 = str_to_felt('C')
     svg = '<svg xmlns = "http://www.w3.org/2000/svg" width = "30" height = "30" viewBox = "0 0 30 30" stroke = "#DAE5EF" fill = "none" stroke-width = "3" stroke-linecap = "round" stroke-linejoin = "round" class = "feather feather-search" > <circle cx = "11" cy = "11" r = "8" > </circle > <line x1 = "21" y1 = "21" x2 = "16.65" y2 = "16.65" > </line> </svg>'
 
     input_string_array = list(map(lambda str: str_to_felt(

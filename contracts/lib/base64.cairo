@@ -6,8 +6,7 @@ from starkware.cairo.common.math_cmp import is_le
 from starkware.cairo.common.memcpy import memcpy
 
 from contracts.lib.tables import get_table_encode, get_char_from_table
-from contracts.lib.utils.binary import (
-    binary_encode, add_8bit_padding, binary_decode, remove_6bit_padding)
+from contracts.lib.binary import binary_encode, add_8bit_padding, binary_decode, remove_6bit_padding
 
 # data = ["A", "B", "C"]
 

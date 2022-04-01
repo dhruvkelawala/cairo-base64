@@ -2,7 +2,7 @@
 %builtins pedersen range_check ecdsa
 
 from contracts.lib.base64 import base64_encode
-from contracts.lib.utils.binary import binary_encode, binary_decode
+from contracts.lib.binary import binary_encode, binary_decode
 from starkware.cairo.common.uint256 import Uint256
 
 @view
